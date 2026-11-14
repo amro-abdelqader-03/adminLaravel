@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\Category;
+use App\Models\Seller;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -13,6 +15,8 @@ class ProductController extends Controller
     public function index()
     {
         //
+        $products = Product::latest()->paginate(5);
+        return view('products.index', compact('products'));
     }
 
     /**
@@ -21,6 +25,9 @@ class ProductController extends Controller
     public function create()
     {
         //
+        $categories = Category::all();
+        $sellers = Seller::all();
+        return view('products.create', compact('categories', 'sellers'));
     }
 
     /**
@@ -29,6 +36,28 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         //
+        $request->validate([
+            'name' => 'required',
+            'description' => 'required',
+            'price' => 'required',
+            'cost' => 'required',
+            'seller_id' => 'required',
+            'category_id' => 'required',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
+        ]);
+        $input = $request->all();
+
+        if ($image = $request->file('image')) {
+            $destinationPath = 'images/';
+            $profileImage = date('YmdHis') . "." . $image->getClientOriginalExtension();
+            $image->move($destinationPath, $profileImage);
+            $input['image'] = "$profileImage";
+        }
+
+        Product::create($input);
+
+        return redirect()->route('products.index')
+            ->with('success', 'Product created successfully.');
     }
 
     /**
@@ -37,6 +66,7 @@ class ProductController extends Controller
     public function show(Product $product)
     {
         //
+        return view('products.show', compact('product'));
     }
 
     /**
@@ -45,6 +75,7 @@ class ProductController extends Controller
     public function edit(Product $product)
     {
         //
+        return view('products.edit', compact('product'));
     }
 
     /**
@@ -53,6 +84,28 @@ class ProductController extends Controller
     public function update(Request $request, Product $product)
     {
         //
+        $request->validate([
+            'name' => 'required',
+            'description' => 'required',
+            'price' => 'required',
+            'cost' => 'required',
+        ]);
+
+        $input = $request->all();
+
+        if ($image = $request->file('image')) {
+            $destinationPath = 'images/';
+            $profileImage = date('YmdHis') . "." . $image->getClientOriginalExtension();
+            $image->move($destinationPath, $profileImage);
+            $input['image'] = "$profileImage";
+        } else {
+            unset($input['image']);
+        }
+
+        $product->update($input);
+
+        return redirect()->route('products.index')
+            ->with('success', 'Product updated successfully');
     }
 
     /**
@@ -61,5 +114,8 @@ class ProductController extends Controller
     public function destroy(Product $product)
     {
         //
+        $product->delete();
+        return redirect()->route('product.indes')
+            ->with('success', 'Product deleted successfully');
     }
 }
