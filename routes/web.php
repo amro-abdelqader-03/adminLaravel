@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SellerController;
+use App\Http\Controllers\OrderController;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\CategoryController;
@@ -11,3 +12,4 @@ Route::resource('categories', CategoryController::class);
 Route::resource('users', UserController::class);
 Route::resource('sellers', SellerController::class);
 Route::resource('products', ProductController::class);
+Route::resource('orders', OrderController::class);
